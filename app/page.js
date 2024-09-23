@@ -20,15 +20,27 @@ export default function Home() {
   // Add item to database
   const addItem = async (e) => {
     e.preventDefault();
-    if (newItem.name !== "" && newItem.price !== "") {
-      //setItems([...items, newItem])
+    const priceValue = parseFloat(newItem.price);
 
-      await addDoc(collection(db, "items"), {
-        name: newItem.name.trim(),
-        price: newItem.price,
-      });
+    if (newItem.name !== "" && !isNaN(priceValue) && priceValue > 0) {
+      try {
+        await addDoc(collection(db, "items"), {
+          name: newItem.name.trim(),
+          price: priceValue, // Store as a number
+        });
+        setNewItem({ name: "", price: "" });
+      } catch (error) {
+        console.error("Error adding item:", error);
+        alert("Failed to add item. Please try again.");
+      }
+    } else {
+      if (newItem.name == "") {
+        alert("Please enter a valid item name");
+      }
+      else if (priceValue < 0) {
+        alert("Please enter a positive price.");
+      }
     }
-    setNewItem({ name: "", price: "" });
   };
 
   // Read item from database
@@ -37,28 +49,29 @@ export default function Home() {
     const q = query(collection(db, "items"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       let itemsArr = [];
-
+      let totalPrice = 0;
+  
       querySnapshot.forEach((doc) => {
-        itemsArr.push({ ...doc.data(), id: doc.id });
+        const itemData = { ...doc.data(), id: doc.id };
+        itemsArr.push(itemData);
+        totalPrice += parseFloat(itemData.price); // Accumulate total price
       });
+  
       setItems(itemsArr);
-
-      // Read total from itemsArr
-      const calculateTotal = () => {
-        const totalPrice = itemsArr.reduce(
-          (sum, item) => sum + parseFloat(item.price),
-          0
-        );
-        setTotal(totalPrice);
-      };
-      calculateTotal();
-      return () => unsubscribe();
+      setTotal(totalPrice); // Update total after processing all items
     });
+  
+    return () => unsubscribe();
   }, []);
 
   // Delete item from database
   const deleteItem = async (id) => {
-    await deleteDoc(doc(db, "items", id));
+    try {
+      await deleteDoc(doc(db, "items", id));
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("Failed to delete item. Please try again.");
+    }
   };
 
   return (
@@ -93,9 +106,9 @@ export default function Home() {
             </button>
           </form>
           <ul>
-            {items.map((item, id) => (
+            {items.map((item) => (
               <li
-                key={id}
+                key={item.id}
                 className="my-4 w-full flex justify-between bg-slate-950"
               >
                 <div className="p-4 w-full flex justify-between">
