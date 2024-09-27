@@ -13,7 +13,6 @@ import { db } from "./firebase";
 
 export default function Home() {
 	const [items, setItems] = useState([]);
-
 	const [newItem, setNewItem] = useState({ name: "", price: "" });
 	const [total, setTotal] = useState(0);
 
@@ -42,8 +41,7 @@ export default function Home() {
 		}
 	};
 
-	// Read item from database
-
+	// Read items from database
 	useEffect(() => {
 		const q = query(collection(db, "items"));
 		const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -74,15 +72,17 @@ export default function Home() {
 	};
 
 	return (
-		<main className="flex min-h-screen flex-col items-center justify-between sm:p-24 p-4">
-			<div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm">
-				<h1 className="text-4xl p-4 text-center">Expense Tracker</h1>
-				<div className="bg-slate-800 p-4 rounded-lg">
-					<form className="grid grid-cols-6 items-center text-black">
+		<main className="flex min-h-screen flex-col items-center justify-center bg-gray-900 p-4">
+			<div className="z-10 w-full max-w-5xl p-8 bg-gray-800 rounded-lg shadow-lg">
+				<h1 className="text-4xl text-center text-white mb-6">
+					Expense Tracker
+				</h1>
+				<div className="bg-gray-700 p-4 rounded-lg">
+					<form className="grid grid-cols-6 items-center mb-4">
 						<input
 							value={newItem.name}
 							onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-							className="col-span-3 p-3 border"
+							className="col-span-3 p-3 border border-gray-600 bg-gray-800 text-white rounded focus:outline-none focus:ring focus:ring-blue-500"
 							type="text"
 							placeholder="Enter Item"
 						/>
@@ -91,44 +91,42 @@ export default function Home() {
 							onChange={(e) =>
 								setNewItem({ ...newItem, price: e.target.value })
 							}
-							className="col-span-2 p-3 border mx-3"
+							className="col-span-2 p-3 border border-gray-600 bg-gray-800 text-white rounded mx-3 focus:outline-none focus:ring focus:ring-blue-500"
 							type="number"
 							min="0"
 							placeholder="Enter $"
 						/>
 						<button
 							onClick={addItem}
-							className="text-white bg-slate-950 hover:bg-slate-900 p-3 text-xl"
+							className="col-span-1 text-white bg-blue-600 hover:bg-blue-500 p-3 rounded transition"
 							type="submit"
 						>
 							+
 						</button>
 					</form>
-					<ul>
+					<ul className="space-y-4">
 						{items.map((item) => (
 							<li
 								key={item.id}
-								className="my-4 w-full flex justify-between bg-slate-950"
+								className="flex justify-between items-center bg-gray-800 p-4 rounded-lg shadow hover:bg-gray-700 transition"
 							>
-								<div className="p-4 w-full flex justify-between">
-									<span className="capitalize">{item.name}</span>
-									<span>${item.price}</span>
+								<div className="flex justify-between w-full">
+									<span className="capitalize text-white">{item.name}</span>
+									<span className="text-white">${item.price}</span>
 								</div>
 								<button
 									onClick={() => deleteItem(item.id)}
-									className="ml-8 p-4 border-l-2 border-slate-900 hover:bg-slate-900"
+									className="ml-4 p-2 text-red-500 hover:bg-red-400 rounded transition"
 								>
 									X
 								</button>
 							</li>
 						))}
 					</ul>
-					{items.length < 1 ? (
-						""
-					) : (
-						<div className="flex justify-between p-3">
-							<span>Total</span>
-							<span>${total}</span>
+					{items.length > 0 && (
+						<div className="flex justify-between p-3 mt-4 bg-gray-700 rounded-lg">
+							<span className="text-white">Total</span>
+							<span className="text-white">${total}</span>
 						</div>
 					)}
 				</div>
